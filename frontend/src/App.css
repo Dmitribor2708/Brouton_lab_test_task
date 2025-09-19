@@ -1,0 +1,38 @@
+.app-container {
+  min-height: 100vh;
+  background:  #58b5cc 100%
+}
+
+.audio-recorder-card {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: none !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+.notes-table-card {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: none !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table th {
+  border-top: none;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* Стили для фильтров */
+.input-group-sm .form-control {
+  font-size: 0.875rem;
+}
+
+.input-group-text {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid #dee2e6;
+}

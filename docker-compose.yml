@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # База данных 
+  postgres:
+    image: postgres:15
+    container_name: audio_notes_postgres
+    environment:
+      POSTGRES_DB: audio_notes
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password123
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d audio_notes"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Вебсайт
+  frontend:
+    build: ./frontend   
+    container_name: audio_notes_frontend
+    ports:
+      - "5173:80"  # Nginx на 80 порту, пробрасываем на 5173
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    restart: unless-stopped
+    
+
+  # Backend (FastAPI)
+  backend:
+    build: ./backend
+    container_name: audio_notes_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://user:password123@postgres:5432/audio_notes
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # TODO - rabbitMQ
+
+volumes:
+  postgres_data:
