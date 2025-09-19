@@ -1,0 +1,21 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Устанавливаем uv
+RUN pip install uv
+
+# Копируем pyproject.toml
+COPY pyproject.toml .
+
+# Устанавливаем зависимости через uv
+RUN uv pip install --system -r pyproject.toml
+
+# Копируем остальной код
+COPY . .
+
+# Создаем директорию для приложения
+RUN mkdir -p app
+
+# Запускаем приложение
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
