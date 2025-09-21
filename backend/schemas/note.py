@@ -14,7 +14,12 @@ class NoteCreate(NoteBase):
 
 
 class NoteUpdate(NoteBase):
-    pass
+    title: Optional[str] = None
+    tags: Optional[List[str]] = None
+    notes: Optional[str] = None
+
+    class Config:
+        extra = "ignore"
 
 
 class NoteResponse(NoteBase):

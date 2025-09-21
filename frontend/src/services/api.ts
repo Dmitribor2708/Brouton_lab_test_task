@@ -10,11 +10,29 @@ const api = axios.create({
   },
 })
 
+// интерцептор для обработки ошибок
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', error.response?.data || error.message)
+    return Promise.reject(error)
+  }
+)
+
+
 export const notesApi = {
   // Получить все заметки
   getNotes: async (): Promise<AudioNote[]> => {
-    const response = await api.get('/notes')
-    return response.data
+    try {
+      console.log('Fetching notes...')
+      const response = await api.get('/notes')
+      console.log('Notes received:', response.data)
+      return response.data
+    } 
+    catch (error) {
+      console.error('Error fetching notes:', error)
+      throw error
+    }
   },
 
   // Получить конкретную заметку

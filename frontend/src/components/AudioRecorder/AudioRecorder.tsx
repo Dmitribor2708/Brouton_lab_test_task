@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Card, Button, Form, Alert } from 'react-bootstrap'
+import { Card, Button, Form, Alert, ProgressBar } from 'react-bootstrap'
 import { Mic, Square, Trash2 } from 'lucide-react'
 import { useAudioRecorder } from '../../hooks/useAudioRecorder'
 
@@ -7,24 +7,37 @@ const AudioRecorder: React.FC = () => {
   const [title, setTitle] = useState('')
   const [tags, setTags] = useState('')
   const [notes, setNotes] = useState('')
-  const { isRecording, audioUrl, uploadStatus, startRecording, stopRecording, uploadAudio, clearAudio } = useAudioRecorder()
+  const { 
+    isRecording, 
+    audioUrl, 
+    uploadStatus, 
+    uploadProgress,
+    startRecording, 
+    stopRecording, 
+    uploadAudio, 
+    clearAudio 
+  } = useAudioRecorder()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!title.trim() || !audioUrl) return
 
-    const noteId = await uploadAudio(
-      title.trim(),
-      tags.split(',').map(tag => tag.trim()).filter(Boolean),
-      notes.trim()
-    )
+    try {
+      const noteId = await uploadAudio(
+        title.trim(),
+        tags.split(',').map(tag => tag.trim()).filter(Boolean),
+        notes.trim()
+      )
 
-    if (noteId) {
-      // Очищаем форму после успешной отправки
-      setTitle('')
-      setTags('')
-      setNotes('')
-      clearAudio()
+      if (noteId) {
+        //очищаем форму после успешной отправки
+        setTitle('')
+        setTags('')
+        setNotes('')
+        clearAudio()
+      }
+    } catch (error) {
+      console.error('Upload failed:', error)
     }
   }
 
@@ -43,10 +56,14 @@ const AudioRecorder: React.FC = () => {
       </Card.Header>
       <Card.Body>
         {uploadStatus === 'success' && (
-          <Alert variant="success">Аудио успешно отправлено на обработку!</Alert>
+          <Alert variant="success">
+            Аудио успешно отправлено на обработку! Заметка будет готова через несколько минут.
+          </Alert>
         )}
         {uploadStatus === 'error' && (
-          <Alert variant="danger">Ошибка при отправке аудио. Попробуйте снова!</Alert>
+          <Alert variant="danger">
+            Ошибка при отправке аудио. Попробуйте снова!
+          </Alert>
         )}
 
         <Form onSubmit={handleSubmit}>
@@ -58,7 +75,7 @@ const AudioRecorder: React.FC = () => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              disabled={uploadStatus === 'uploading'}
+              disabled={uploadStatus === 'uploading' || isRecording}
             />
           </Form.Group>
 
@@ -69,7 +86,7 @@ const AudioRecorder: React.FC = () => {
               placeholder="работа, идеи, важное"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
-              disabled={uploadStatus === 'uploading'}
+              disabled={uploadStatus === 'uploading' || isRecording}
             />
           </Form.Group>
 
@@ -81,7 +98,7 @@ const AudioRecorder: React.FC = () => {
               placeholder="Дополнительные заметки..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              disabled={uploadStatus === 'uploading'}
+              disabled={uploadStatus === 'uploading' || isRecording}
             />
           </Form.Group>
 
@@ -112,10 +129,21 @@ const AudioRecorder: React.FC = () => {
             )}
           </div>
 
+          {uploadStatus === 'uploading' && (
+            <div className="mb-3">
+              <ProgressBar 
+                now={uploadProgress} 
+                label={`${uploadProgress.toFixed(1)}%`} 
+                animated 
+              />
+              <small className="text-muted">Отправка аудио...</small>
+            </div>
+          )}
+
           <Button 
             type="submit" 
             variant="success" 
-            disabled={!audioUrl || !title.trim() || uploadStatus === 'uploading'}
+            disabled={!audioUrl || !title.trim() || uploadStatus === 'uploading' || isRecording}
           >
             {uploadStatus === 'uploading' ? 'Отправка...' : 'Сохранить заметку'}
           </Button>

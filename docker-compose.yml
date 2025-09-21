@@ -40,7 +40,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql+asyncpg://user:password123@postgres:5432/audio_notes
+      - DATABASE_URL=postgresql+asyncpg://user:password123@audio_notes_postgres:5432/audio_notes
     depends_on:
       postgres:
         condition: service_healthy

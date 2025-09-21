@@ -7,8 +7,10 @@ export const useAudioRecorder = () => {
   const [isRecording, setIsRecording] = useState(false)
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle')
+  const [uploadProgress, setUploadProgress] = useState(0)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
+  const currentNoteIdRef = useRef<string | null>(null)
 
   const startRecording = async () => {
     try {
@@ -30,6 +32,7 @@ export const useAudioRecorder = () => {
       mediaRecorder.start()
       setIsRecording(true)
       setUploadStatus('idle')
+      setUploadProgress(0)
     } catch (error) {
       console.error('Ошибка записи:', error)
       alert('Микрофон не доступен. Проверьте разрешения.')
@@ -44,13 +47,14 @@ export const useAudioRecorder = () => {
     }
   }
 
-  const uploadAudio = useCallback(async (title: string, tags: string[], notes: string = '') => {
-    if (audioChunksRef.current.length === 0) return
+  const uploadAudio = useCallback(async (title: string, tags: string[], notes: string = ''): Promise<string | null> => {
+    if (audioChunksRef.current.length === 0) return null
 
     setUploadStatus('uploading')
+    setUploadProgress(0)
     
     try {
-      //создаем заметку через POST API
+      //cоздаем заметку через POST API
       const noteData: CreateNoteRequest = {
         title: title.trim(),
         tags: tags.filter(tag => tag.trim()),
@@ -58,31 +62,86 @@ export const useAudioRecorder = () => {
       }
 
       const createdNote = await notesApi.createNote(noteData)
+      currentNoteIdRef.current = createdNote.id
       
-      //затем отправляем аудио через WebSocket
+      //обработчики WebSocket сообщений
+      const handleWebSocketMessage = (data: any) => {
+        switch (data.status) {
+          case 'connected':
+            // WebSocket подключился - отправляем данные
+            sendAudioData(createdNote.id)
+            break
+          case 'ready':
+            // Сервер готов принимать аудио (если нужно)
+            break
+          case 'progress':
+            setUploadProgress(data.progress)
+            break
+          case 'completed':
+            setUploadStatus('success')
+            setUploadProgress(100)
+            webSocketService.disconnect()
+            break
+          case 'error':
+            setUploadStatus('error')
+            webSocketService.disconnect()
+            break
+          }
+      }
+
+      const handleWebSocketError = (error: Event) => {
+        console.error('WebSocket error:', error)
+        setUploadStatus('error')
+        webSocketService.disconnect()
+      }
+
+      //подключаемся к WebSocket
+      webSocketService.connect(
+        createdNote.id,
+        handleWebSocketMessage,
+        handleWebSocketError
+      )
+
+      //отправляем аудио
       const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
-      
       webSocketService.sendAudio(
         {
-          note_id: createdNote.id, // отправляем ID созданной заметки
-          filename: `audio-${createdNote.id}.webm`
+          filename: `audio-${createdNote.id}.webm`,
+          file_size: audioBlob.size
         },
         audioBlob
       )
 
-      setUploadStatus('success')
       return createdNote.id
+
     } catch (error) {
       console.error('Error uploading audio:', error)
       setUploadStatus('error')
-      throw error
+      webSocketService.disconnect()
+      return null
     }
   }, [])
+  
+  const sendAudioData = (noteId: string) => {
+    const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+    
+    // Отправляем метаданные и аудио
+    webSocketService.sendAudio(
+      {
+        filename: `audio-${noteId}.webm`,
+        file_size: audioBlob.size
+      },
+      audioBlob
+    )
+  }
 
   const clearAudio = () => {
     setAudioUrl(null)
     audioChunksRef.current = []
     setUploadStatus('idle')
+    setUploadProgress(0)
+    currentNoteIdRef.current = null
+    webSocketService.disconnect()
   }
 
   const getAudioBlob = (): Blob | null => {
@@ -94,6 +153,7 @@ export const useAudioRecorder = () => {
     isRecording,
     audioUrl,
     uploadStatus,
+    uploadProgress,
     startRecording,
     stopRecording,
     uploadAudio,

@@ -4,30 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2fba75b4-2d49-4dbe-a101-5c660558cd9f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/backend.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/notes.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/websockets.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/database.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/init_db.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/note.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/run.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/schemas/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/schemas/note.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/audio_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/services/queue_service.py" afterDir="false" />
+    <list default="true" id="2fba75b4-2d49-4dbe-a101-5c660558cd9f" name="Changes" comment="Additional endpoint. Before S3 initialization">
+      <change afterPath="$PROJECT_DIR$/app.env" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/core/rabbitmq.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/core/s3_client.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/upload_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yandex_s3_connection_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/notes.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/notes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/websockets.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/websockets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,15 +45,29 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Python.audio_file.executor": "Run",
     "Python.config.executor": "Run",
-    "Python.init_db.executor": "Debug",
+    "Python.init_db.executor": "Run",
     "Python.main.executor": "Run",
     "Python.run.executor": "Debug",
+    "Python.s3_client.executor": "Debug",
+    "Python.test_connection.executor": "Run",
     "Python.test_connection_final.executor": "Debug",
+    "Python.websockets.executor": "Run",
+    "Python.yandex_s3_connection_test.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master"
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "D:/15092025/test_task/backend/schemas"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\15092025\test_task\backend\schemas" />
+      <recent name="D:\15092025\test_task\backend\api" />
+      <recent name="D:\15092025\test_task\backend\core" />
+      <recent name="D:\15092025\test_task\backend\models" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="run" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="backend" />
@@ -106,15 +108,58 @@
       <option name="presentableId" value="Default" />
       <updated>1758135182681</updated>
     </task>
+    <task id="LOCAL-00001" summary="More or less working interaction with db and front-end. Before splliting API and business logic">
+      <option name="closed" value="true" />
+      <created>1758440909332</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1758440909332</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Additional endpoint. Before S3 initialization">
+      <option name="closed" value="true" />
+      <created>1758447804203</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1758447804203</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="More or less working interaction with db and front-end. Before splliting API and business logic" />
+    <MESSAGE value="Additional endpoint. Before S3 initialization" />
+    <option name="LAST_COMMIT_MESSAGE" value="Additional endpoint. Before S3 initialization" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/init_db.py</url>
-          <line>15</line>
-          <option name="timeStamp" value="3" />
+          <url>file://$PROJECT_DIR$/yandex_s3_connection_test.py</url>
+          <line>9</line>
+          <option name="timeStamp" value="29" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/services/upload_service.py</url>
+          <line>78</line>
+          <option name="timeStamp" value="46" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/services/upload_service.py</url>
+          <line>127</line>
+          <option name="timeStamp" value="49" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

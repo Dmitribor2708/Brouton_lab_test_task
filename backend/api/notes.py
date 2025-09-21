@@ -10,6 +10,8 @@ from core.database import get_db
 from models.note import AudioNote
 from schemas.note import NoteResponse, NoteCreate, NoteUpdate
 
+from services.note_service import NoteService
+
 router = APIRouter()
 
 
@@ -17,34 +19,26 @@ router = APIRouter()
 async def get_notes(
         skip: int = Query(0, ge=0),
         limit: int = Query(100, ge=1, le=1000),
-        search: Optional[str] = None,
-        status_filter: Optional[str] = None,
+        search: Optional[str] = Query(None),
+        status_filter: Optional[str] =  Query(None),
+        tags: Optional[List[str]] = Query(None),
         db: AsyncSession = Depends(get_db)
 ):
     # Асинхронное получение списка заметок с фильтрацией
     try:
-        query = select(AudioNote).order_by(AudioNote.created_at.desc())
+        note_service = NoteService(db)
 
-        # Фильтр по поиску
+        # Подготавливаем фильтры
+        filters = {}
         if search:
-            query = query.where(
-                or_(
-                    AudioNote.title.ilike(f"%{search}%"),
-                    AudioNote.notes.ilike(f"%{search}%"),
-                    AudioNote.transcription.ilike(f"%{search}%")
-                )
-            )
-
-        # Фильтр по статусу
+            filters['search'] = search
         if status_filter:
-            query = query.where(AudioNote.status == status_filter)
+            filters['status'] = status_filter
+        if tags:
+            filters['tags'] = tags
 
-        query = query.offset(skip).limit(limit)
-
-        result = await db.execute(query)
-        notes = result.scalars().all()
+        notes = await note_service.get_notes(skip, limit, filters)
         return notes
-
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -58,19 +52,16 @@ async def get_note(
         db: AsyncSession = Depends(get_db)
 ):
     # Асинхронное получение конкретной заметки
-    try:
-        result = await db.execute(
-            select(AudioNote).where(AudioNote.id == note_id)
-        )
-        note = result.scalar_one_or_none()
 
-        if note is None:
+    try:
+        note_service = NoteService(db)
+        note_to_return = await note_service.get_note(note_id)
+        if note_to_return is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Note not found"
             )
-
-        return note
+        return note_to_return
 
     except HTTPException:
         raise
@@ -88,6 +79,10 @@ async def create_note(
 ):
     # Асинхронное создание заметки
     try:
+        note_service = NoteService(db)
+        created_note = await note_service.create_note(note)
+        return created_note
+        '''
         db_note = AudioNote(
             title=note.title,
             tags=note.tags,
@@ -101,7 +96,7 @@ async def create_note(
         await db.refresh(db_note)
 
         return db_note
-
+    '''
     except Exception as e:
         await db.rollback()
         raise HTTPException(
@@ -113,11 +108,22 @@ async def create_note(
 @router.put("/notes/{note_id}", response_model=NoteResponse)
 async def update_note(
         note_id: uuid.UUID,
-        note_update: NoteUpdate,
+        note_update_data: NoteUpdate,
         db: AsyncSession = Depends(get_db)
 ):
     # Асинхронное обновление заметки
     try:
+        note_service = NoteService(db)
+        note_to_edit = await note_service.get_note(note_id)
+        if note_to_edit is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Note not found"
+            )
+
+        updated_note = await note_service.update_note(note_to_edit.id, note_update_data)
+        return updated_note
+        '''
         result = await db.execute(
             select(AudioNote).where(AudioNote.id == note_id)
         )
@@ -140,7 +146,7 @@ async def update_note(
         await db.refresh(db_note)
 
         return db_note
-
+        '''
     except HTTPException:
         raise
     except Exception as e:
@@ -158,6 +164,17 @@ async def delete_note(
 ):
     # Асинхронное удаление заметки
     try:
+        note_service = NoteService(db)
+        note_to_edit = await note_service.get_note(note_id)
+        if note_to_edit is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Note not found"
+            )
+
+        await note_service.delete_note(note_id)
+        return None # TODO <-- 200 или 204??
+        '''
         result = await db.execute(
             select(AudioNote).where(AudioNote.id == note_id)
         )
@@ -173,7 +190,7 @@ async def delete_note(
         await db.commit()
 
         return None
-
+        '''
     except HTTPException:
         raise
     except Exception as e:
@@ -189,7 +206,11 @@ async def get_transcription(
         note_id: uuid.UUID,
         db: AsyncSession = Depends(get_db)
 ):
-    # Получение транскрибации заметки
+    # Получение транскрибации заметки  TODO - в бизнес-логику
+    note_service = NoteService(db)
+
+    #note_transcription = await note
+    '''
     result = await db.execute(
         select(AudioNote.transcription).where(AudioNote.id == note_id)
     )
@@ -202,6 +223,7 @@ async def get_transcription(
         )
 
     return {"transcription": transcription}
+    '''
 
 
 @router.get("/notes/{note_id}/summary", response_model=dict)
@@ -209,7 +231,7 @@ async def get_summary(
         note_id: uuid.UUID,
         db: AsyncSession = Depends(get_db)
 ):
-    # Получение суммаризации заметки
+    # Получение суммаризации заметки TODO - в бизнес-логику
     result = await db.execute(
         select(AudioNote.summary).where(AudioNote.id == note_id)
     )

@@ -25,4 +25,16 @@ export interface UpdateNoteRequest {
   notes?: string
 }
 
-//TODO - DELETE
+export interface NoteResponse {
+  id: string
+  title: string
+  tags: string[]
+  notes?: string
+  audio_filename: string
+  audio_url?: string
+  status: string
+  transcription?: string
+  summary?: string
+  created_at: string
+  updated_at: string
+}

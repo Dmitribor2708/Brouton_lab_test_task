@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Dropdown, Button, Modal } from 'react-bootstrap'
-import { MoreHorizontal, FileText, Sparkles } from 'lucide-react'
+import { MoreHorizontal, FileText, Sparkles, BookOpen } from 'lucide-react'
 import type { AudioNote } from '../../types/note'
 
 interface DetailsDropdownProps {
@@ -39,6 +39,13 @@ const DetailsDropdown: React.FC<DetailsDropdownProps> = ({ note }) => {
         </Dropdown.Toggle>
 
         <Dropdown.Menu>
+          <Dropdown.Item 
+            onClick={() => handleShow('summary')}
+            disabled={!note.summary}
+          >
+            <BookOpen size={16} className="me-2" />
+            Примечания
+          </Dropdown.Item>
           <Dropdown.Item 
             onClick={() => handleShow('transcription')}
             disabled={!note.transcription}

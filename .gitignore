@@ -1,0 +1,5 @@
+backend/db_layer/__pycache__/note_db_interaction.cpython-311.pyc
+backend/__pycache__/main.cpython-311.pyc
+backend/api/__pycache__/notes.cpython-311.pyc
+*.pyc
+*.pyc
